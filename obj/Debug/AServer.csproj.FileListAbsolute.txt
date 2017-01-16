@@ -7,3 +7,4 @@ i:\rep\AServer\bin\Debug\System.DirectoryServices.AccountManagement.dll
 i:\rep\AServer\obj\Debug\AServer.csprojResolveAssemblyReference.cache
 i:\rep\AServer\bin\Debug\Newtonsoft.Json.dll
 i:\rep\AServer\bin\Debug\Newtonsoft.Json.xml
+i:\rep\AServer\bin\Debug\System.Data.OracleClient.dll
