@@ -33,6 +33,11 @@ namespace AServer
             {
                 Console.WriteLine("Возникло исключение при загрузке параметров: "+_Exception.Message);
             }
+
+            AData.DataUsers[] _List = new AData.DataUsers[5];
+
+            JSON _JSON = new JSON(_List);
+
             SocketServer _SocketServer = new SocketServer();
 
             Console.Read();
