@@ -1,6 +1,5 @@
 I:\rep\AServer\bin\Debug\AServer.exe.config
 I:\rep\AServer\bin\Debug\AServer.exe
 I:\rep\AServer\bin\Debug\AServer.pdb
-I:\rep\AServer\obj\Debug\AServer.csprojResolveAssemblyReference.cache
 I:\rep\AServer\obj\Debug\AServer.exe
 I:\rep\AServer\obj\Debug\AServer.pdb
