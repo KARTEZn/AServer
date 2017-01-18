@@ -10,7 +10,6 @@ namespace AServer
         public static string ora_password;
         public static string ora_datasource;
 
-        public static OraSes Ora;
         public static SocketServer _SocketServer;
 
 
@@ -63,10 +62,6 @@ namespace AServer
                 {
                     Console.WriteLine("Возникло исключение при загрузке параметров: " + _Exception.Message);
                 }
-
-                Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
-
-                Ora = new OraSes(ora_username,ora_password, ora_datasource);
 
                 Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
 

@@ -67,19 +67,32 @@ namespace AServer
                     while (stream.DataAvailable);
 
                     string message = builder.ToString();
+                    //Console.WriteLine(message);
+
+                    Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+
+                    OraSes Ora = new OraSes(Program.ora_username, Program.ora_password, Program.ora_datasource);
+
+                    JSON _JSON = new JSON(Ora.RQuery("select * from smgoods"));
+                    message = _JSON.output;
+
+                    
+
+
+
                     Console.WriteLine(message);
 
-                    JSON _JSON = new JSON(Program.Ora.RQuery("select * from smgoods"));
+                    Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
 
-                    message = _JSON.output;
                     data = Encoding.UTF8.GetBytes(message);
                     stream.Write(data, 0, data.Length);
 
-                    stream.Close();
+                    //stream.Close();
                 }
             }
-            catch
+            catch(Exception _Exception)
             {
+                Console.WriteLine("Ошибка [SocketServer]: " + _Exception.Message);
             }
             finally
             {

@@ -9,7 +9,14 @@ namespace AServer
 
         public JSON(object Convert)
         {
-            output = JsonConvert.SerializeObject(Convert);
+            try
+            {
+                output = JsonConvert.SerializeObject(Convert);
+            }
+            catch(Exception _Exception)
+                    {
+                Console.WriteLine("Ошибка [JSON]: " + _Exception.Message);
+            }
             //Console.WriteLine(output);
         }
 
