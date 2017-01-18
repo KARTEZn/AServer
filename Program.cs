@@ -6,41 +6,101 @@ namespace AServer
     {
         public static string ip;
         public static int port;
+        public static string ora_username;
+        public static string ora_password;
+        public static string ora_datasource;
+
+        public static OraSes Ora;
+        public static SocketServer _SocketServer;
+
 
         static void Main(string[] args)
         {
             Console.Title = "AServer";
-            try
+            if (args.Length == 0)
             {
-                int i = 0;
-                while (i != args.Length)
+                Console.WriteLine("Ошибка: Отсутствуют параметры для запуска ....");
+                Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+                try
                 {
-                    if (args[i].ToString().Contains("ip:"))
+                    int i = 0;
+                    while (i != args.Length)
                     {
-                        ip = args[i].ToString().Substring(3, args[i].ToString().Length - 3);
-                        Console.WriteLine("IP: "+ip.ToString());
+                        if (args[i].ToString().Contains("ip:"))
+                        {
+                            ip = args[i].ToString().Substring(3, args[i].ToString().Length - 3);
+                            Console.WriteLine("IP: " + ip.ToString());
+                        }
+                        if (args[i].ToString().Contains("port:"))
+                        {
+                            port = Convert.ToInt32(args[i].ToString().Substring(5, args[i].ToString().Length - 5));
+                            Console.WriteLine("PORT: " + port.ToString());
+                        }
+                        if (args[i].ToString().Contains("ora_u:"))
+                        {
+                            ora_username = args[i].ToString().Substring(6, args[i].ToString().Length - 6);
+                            Console.WriteLine("oracle username: " + ora_username);
+                        }
+                        if (args[i].ToString().Contains("ora_p:"))
+                        {
+                            ora_password = args[i].ToString().Substring(6, args[i].ToString().Length - 6);
+                            Console.WriteLine("oracle password: " + charpas(ora_password));
+                        }
+                        if (args[i].ToString().Contains("ora_d:"))
+                        {
+                            ora_datasource = args[i].ToString().Substring(6, args[i].ToString().Length - 6);
+                            Console.WriteLine("oracle datasource: " + ora_datasource);
+                        }
+                        i += 1;
                     }
-                    if (args[i].ToString().Contains("port:"))
-                    {
-                        port = Convert.ToInt32(args[i].ToString().Substring(5, args[i].ToString().Length - 5));
-                        Console.WriteLine("PORT: " + port.ToString());
-                    }
-                    i += 1;
+                    Console.WriteLine("Загрузка параметров завершена!");
                 }
-                Console.WriteLine("Загрузка параметров завершена!");
+                catch (Exception _Exception)
+                {
+                    Console.WriteLine("Возникло исключение при загрузке параметров: " + _Exception.Message);
+                }
+
+                Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+
+                Ora = new OraSes(ora_username,ora_password, ora_datasource);
+
+                Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+
+                /*
+
+                JSON _JSON = new JSON(Ora.RQuery("select * from smstorelocations"));
+
+                */
+
+                _SocketServer = new SocketServer(ip, port);
+
+                /*
+                AData.DataUsers[] _List = new AData.DataUsers[5];
+
+                JSON _JSON = new JSON(_List);
+
+                
+                */
+
+                Console.ReadLine();
             }
-            catch(Exception _Exception)
-            {
-                Console.WriteLine("Возникло исключение при загрузке параметров: "+_Exception.Message);
-            }
-
-            AData.DataUsers[] _List = new AData.DataUsers[5];
-
-            JSON _JSON = new JSON(_List);
-
-            SocketServer _SocketServer = new SocketServer();
-
-            Console.Read();
         }
+
+        private static string charpas(string value)
+        {
+            string temp  = "";
+            int i = 0;
+            while (i != value.Length)
+            {
+                temp += temp + "*";
+                i += 1;
+            }
+            return temp;
+        }
+
     }
 }

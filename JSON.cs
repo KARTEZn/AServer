@@ -5,10 +5,12 @@ namespace AServer
 {
     class JSON
     {
+        public string output;
+
         public JSON(object Convert)
         {
-            string output = JsonConvert.SerializeObject(Convert);
-            Console.WriteLine(output);
+            output = JsonConvert.SerializeObject(Convert);
+            //Console.WriteLine(output);
         }
 
         ~JSON()

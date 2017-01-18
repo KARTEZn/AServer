@@ -10,11 +10,11 @@ namespace AServer
     {
         static TcpListener listener;
 
-        public SocketServer()
+        public SocketServer(string ip, int port)
         {
             try
             {
-                listener = new TcpListener(IPAddress.Parse(Program.ip), Program.port);
+                listener = new TcpListener(IPAddress.Parse(ip), port);
                 listener.Start();
                 Console.WriteLine("Ожидание подключений...");
 
@@ -31,11 +31,11 @@ namespace AServer
             {
                 Console.WriteLine("Во время подключения возникла ошибка: " + _Exception);
             }
-            finally
+            /*finally
             {
                 if (listener != null)
                     listener.Stop();
-            }
+            }*/
         }
     }
 
@@ -69,7 +69,9 @@ namespace AServer
                     string message = builder.ToString();
                     Console.WriteLine(message);
 
-                    message = "NoData";
+                    JSON _JSON = new JSON(Program.Ora.RQuery("select * from smgoods"));
+
+                    message = _JSON.output;
                     data = Encoding.UTF8.GetBytes(message);
                     stream.Write(data, 0, data.Length);
 
