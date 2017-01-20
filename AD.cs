@@ -8,11 +8,11 @@ namespace AServer
     {
         #region Переменные
 
-        readonly static string sDomain = "astoms.local";
-        readonly static string sDefaultOU = "DC=astoms,DC=local";
-        readonly static string sDefaultRootOU = "DC=astoms,DC=local";
-        readonly static string sServiceUser = "gurinenko_n";
-        readonly static string sServicePassword = "kj87dyt";
+        readonly static string sDomain = Program.sDomain;
+        readonly static string sDefaultOU = Program.sDefaultOU;
+        readonly static string sDefaultRootOU = Program.sDefaultRootOU;
+        readonly static string sServiceUser = Program.sServiceUser;
+        readonly static string sServicePassword = Program.sServicePassword;
 
         #endregion
 

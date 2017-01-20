@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Text.RegularExpressions;
-using System.IO;
 
 namespace AServer
 {
@@ -16,9 +14,11 @@ namespace AServer
         // Отправка страницы с ошибкой
         private void SendError(TcpClient Client, int Code)
         {
+            string CodeStr;
+            CodeStr = "<h1>Ошибочный запрос! Ошибка [" + Code.ToString() + "]</h1>";
             // Получаем строку вида "200 OK"
             // HttpStatusCode хранит в себе все статус-коды HTTP/1.1
-            string CodeStr = "<h1>Ошибочка: "+Code.ToString()+"</h1>";
+
             // Код простой HTML-странички
             string Html = "<html><body><h1>" + CodeStr + "</h1></body></html>";
             // Необходимые заголовки: ответ сервера, тип и длина содержимого. После двух пустых строк - само содержимое
@@ -144,7 +144,59 @@ namespace AServer
                 }
                 else SendError(Client, 404);
             }
+            if (RequestUri.IndexOf("ad") > -1)
+            {
+                Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
 
+                string[] query;
+
+                try
+                {
+                    query = RequestUri.Split(new char[] { '&' });
+                }
+                catch
+                {
+                    query = null;
+                }
+
+                if (query != null)
+                {
+                    Console.WriteLine("Запрос в базу [active directory]: " + query[1]);
+
+                    OraSes Ora;
+                    JSON _JSON;
+
+                    try
+                    {
+
+                        _JSON = new JSON(AD.ValidateCredentials(query[1], query[2]));
+                        Console.WriteLine("Результат [active directory]: "+_JSON.output);
+                    }
+                    catch (Exception _Exception)
+                    {
+                        Console.WriteLine("Ошибка [query]: " + _Exception.Message);
+
+                        string error = "error: " + _Exception.Message;
+                        byte[] EBuffer = Encoding.UTF8.GetBytes(error);
+                        Client.GetStream().Write(EBuffer, 0, EBuffer.Length);
+
+                        Ora = null;
+
+                        _JSON = null;
+                    }
+
+                    string Headers = "HTTP/1.1 200 OK\nContent-Type: application/json;\nContent-Length: " + _JSON.output.Length + ";\ncharset=utf-8;\n\n";
+                    byte[] HeadersBuffer = Encoding.UTF8.GetBytes(Headers);
+                    Client.GetStream().Write(HeadersBuffer, 0, HeadersBuffer.Length);
+
+                    string mymessage = _JSON.output;
+                    byte[] HBuffer = Encoding.UTF8.GetBytes(mymessage);
+                    Client.GetStream().Write(HBuffer, 0, HBuffer.Length);
+
+                    Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+                }
+                else SendError(Client, 404);
+            }
 
             // Закроем файл и соединение
             Client.Close();
