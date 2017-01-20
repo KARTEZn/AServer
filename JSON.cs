@@ -14,15 +14,10 @@ namespace AServer
                 output = JsonConvert.SerializeObject(Convert);
             }
             catch(Exception _Exception)
-                    {
+            {
                 Console.WriteLine("Ошибка [JSON]: " + _Exception.Message);
             }
             //Console.WriteLine(output);
-        }
-
-        ~JSON()
-        {
-            ((IDisposable)this).Dispose();
         }
     }
 }

@@ -65,21 +65,7 @@ namespace AServer
 
                 Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
 
-                /*
-
-                JSON _JSON = new JSON(Ora.RQuery("select * from smstorelocations"));
-
-                */
-
                 _SocketServer = new SocketServer(ip, port);
-
-                /*
-                AData.DataUsers[] _List = new AData.DataUsers[5];
-
-                JSON _JSON = new JSON(_List);
-
-                
-                */
 
                 Console.ReadLine();
             }

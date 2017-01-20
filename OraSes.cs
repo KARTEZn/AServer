@@ -58,18 +58,5 @@ namespace AServer
                 return Result;
             }
         }
-
-        ~OraSes()
-        {
-            try
-            {
-                con.Close();
-                con.Dispose();
-            }
-            catch
-            {
-            }
-        }
-
     }
 }

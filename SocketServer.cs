@@ -1,105 +1,206 @@
 ﻿using System;
-using System.Net;
-using System.Net.Sockets;
+using System.Collections.Generic;
 using System.Text;
+using System.Net.Sockets;
+using System.Net;
 using System.Threading;
+using System.Text.RegularExpressions;
+using System.IO;
 
 namespace AServer
 {
-    class SocketServer
+
+    // Класс-обработчик клиента
+    class Client
     {
-        static TcpListener listener;
-
-        public SocketServer(string ip, int port)
+        // Отправка страницы с ошибкой
+        private void SendError(TcpClient Client, int Code)
         {
-            try
-            {
-                listener = new TcpListener(IPAddress.Parse(ip), port);
-                listener.Start();
-                Console.WriteLine("Ожидание подключений...");
+            // Получаем строку вида "200 OK"
+            // HttpStatusCode хранит в себе все статус-коды HTTP/1.1
+            string CodeStr = "<h1>Ошибочка: "+Code.ToString()+"</h1>";
+            // Код простой HTML-странички
+            string Html = "<html><body><h1>" + CodeStr + "</h1></body></html>";
+            // Необходимые заголовки: ответ сервера, тип и длина содержимого. После двух пустых строк - само содержимое
+            string Str = "HTTP/1.1 " + CodeStr + "\nContent-type: text/html\nContent-Length:" + Html.Length.ToString() + "\n\n" + Html;
+            // Приведем строку к виду массива байт
+            byte[] Buffer = Encoding.UTF8.GetBytes(Str);
+            // Отправим его клиенту
+            Client.GetStream().Write(Buffer, 0, Buffer.Length);
+            // Закроем соединение
+            Client.Close();
+        }
 
-                while (true)
+        // Конструктор класса. Ему нужно передавать принятого клиента от TcpListener
+        public Client(TcpClient Client)
+        {
+            // Объявим строку, в которой будет хранится запрос клиента
+            string Request = "";
+            // Буфер для хранения принятых от клиента данных
+            byte[] Buffer = new byte[1024];
+            // Переменная для хранения количества байт, принятых от клиента
+            int Count;
+            // Читаем из потока клиента до тех пор, пока от него поступают данные
+            while ((Count = Client.GetStream().Read(Buffer, 0, Buffer.Length)) > 0)
+            {
+                // Преобразуем эти данные в строку и добавим ее к переменной Request
+                Request += Encoding.ASCII.GetString(Buffer, 0, Count);
+                // Запрос должен обрываться последовательностью \r\n\r\n
+                // Либо обрываем прием данных сами, если длина строки Request превышает 4 килобайта
+                // Нам не нужно получать данные из POST-запроса (и т. п.), а обычный запрос
+                // по идее не должен быть больше 4 килобайт
+                if (Request.IndexOf("\r\n\r\n") >= 0 || Request.Length > 4096)
                 {
-                    TcpClient client = listener.AcceptTcpClient();
-                    ClientObject clientObject = new ClientObject(client);
-                    // создаем новый поток для обслуживания нового клиента
-                    Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
-                    clientThread.Start();
+                    break;
                 }
             }
-            catch (Exception _Exception)
+
+            // Парсим строку запроса с использованием регулярных выражений
+            // При этом отсекаем все переменные GET-запроса
+            Match ReqMatch = Regex.Match(Request, @"^\w+\s+([^\s\?]+)[^\s]*\s+HTTP/.*|");
+
+            // Если запрос не удался
+            if (ReqMatch == Match.Empty)
             {
-                Console.WriteLine("Во время подключения возникла ошибка: " + _Exception);
+                // Передаем клиенту ошибку 400 - неверный запрос
+                SendError(Client, 400);
+                return;
             }
-            /*finally
+
+            // Получаем строку запроса
+            string RequestUri = ReqMatch.Groups[1].Value;
+
+            // Приводим ее к изначальному виду, преобразуя экранированные символы
+            // Например, "%20" -> " "
+            RequestUri = Uri.UnescapeDataString(RequestUri);
+
+            // Если в строке содержится двоеточие, передадим ошибку 400
+            // Это нужно для защиты от URL типа http://example.com/../../file.txt
+            if (RequestUri.IndexOf("..") >= 0)
             {
-                if (listener != null)
-                    listener.Stop();
-            }*/
+                SendError(Client, 400);
+                return;
+            }
+
+            // Если строка запроса оканчивается на "/", то добавим к ней index.html
+            if (RequestUri.EndsWith("/"))
+            {
+                SendError(Client, 666);
+                return;
+            }
+
+            if (RequestUri.IndexOf("oracle") > -1)
+            {
+                Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+
+                string[] query;
+
+                try
+                {
+                    query = RequestUri.Split(new char[] { '&' });
+                }
+                catch
+                {
+                    query = null;
+                }
+
+                if (query != null)
+                {
+                    Console.WriteLine("Запрос в базу [oracle]: " + query[1]);
+
+                    OraSes Ora;
+                    JSON _JSON;
+
+                    try
+                    {
+
+                        Ora = new OraSes(Program.ora_username, Program.ora_password, Program.ora_datasource);
+
+                        _JSON = new JSON(Ora.RQuery(query[1]));
+
+                    }
+                    catch (Exception _Exception)
+                    {
+                        Console.WriteLine("Ошибка [query]: " + _Exception.Message);
+
+                        string error = "error: "+_Exception.Message;
+                        byte[] EBuffer = Encoding.UTF8.GetBytes(error);
+                        Client.GetStream().Write(EBuffer, 0, EBuffer.Length);
+
+                        Ora = null;
+
+                        _JSON = null;
+                    }
+
+                    string Headers = "HTTP/1.1 200 OK\nContent-Type: application/json;\nContent-Length: " + _JSON.output.Length + ";\ncharset=utf-8;\n\n";
+                    byte[] HeadersBuffer = Encoding.UTF8.GetBytes(Headers);
+                    Client.GetStream().Write(HeadersBuffer, 0, HeadersBuffer.Length);
+
+                    string mymessage = _JSON.output;
+                    byte[] HBuffer = Encoding.UTF8.GetBytes(mymessage);
+                    Client.GetStream().Write(HBuffer, 0, HBuffer.Length);
+
+                    Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+                }
+                else SendError(Client, 404);
+            }
+
+
+            // Закроем файл и соединение
+            Client.Close();
         }
     }
 
-    public class ClientObject
+    class SocketServer
     {
-        public TcpClient client;
-        public ClientObject(TcpClient tcpClient)
+        TcpListener Listener; // Объект, принимающий TCP-клиентов
+
+        // Запуск сервера
+        public SocketServer(string ip, int Port)
         {
-            client = tcpClient;
+            // Определим нужное максимальное количество потоков
+            // Пусть будет по 4 на каждый процессор
+            int MaxThreadsCount = Environment.ProcessorCount * 4;
+            // Установим максимальное количество рабочих потоков
+            ThreadPool.SetMaxThreads(MaxThreadsCount, MaxThreadsCount);
+            // Установим минимальное количество рабочих потоков
+            ThreadPool.SetMinThreads(2, 2);
+
+            Listener = new TcpListener(IPAddress.Parse(ip), Port); // Создаем "слушателя" для указанного порта
+            Listener.Start(); // Запускаем его
+
+            // В бесконечном цикле
+            while (true)
+            {
+                // Принимаем новых клиентов. После того, как клиент был принят, он передается в новый поток (ClientThread)
+                // с использованием пула потоков.
+                //ThreadPool.QueueUserWorkItem(new WaitCallback(ClientThread), Listener.AcceptTcpClient());
+
+                
+                // Принимаем нового клиента
+                TcpClient Client = Listener.AcceptTcpClient();
+                // Создаем поток
+                Thread Thread = new Thread(new ParameterizedThreadStart(ClientThread));
+                // И запускаем этот поток, передавая ему принятого клиента
+                Thread.Start(Client);
+                
+            }
         }
 
-        public void Process()
+        static void ClientThread(Object StateInfo)
         {
-            NetworkStream stream = null;
-            try
+            // Просто создаем новый экземпляр класса Client и передаем ему приведенный к классу TcpClient объект StateInfo
+            new Client((TcpClient)StateInfo);
+        }
+
+        // Остановка сервера
+        ~SocketServer()
+        {
+            // Если "слушатель" был создан
+            if (Listener != null)
             {
-                stream = client.GetStream();
-                byte[] data = new byte[64]; // буфер для получаемых данных
-                while (true)
-                {
-                    // получаем сообщение
-                    StringBuilder builder = new StringBuilder();
-                    int bytes = 0;
-                    do
-                    {
-                        bytes = stream.Read(data, 0, data.Length);
-                        builder.Append(Encoding.UTF8.GetString(data, 0, bytes));
-                    }
-                    while (stream.DataAvailable);
-
-                    string message = builder.ToString();
-                    //Console.WriteLine(message);
-
-                    Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
-
-                    OraSes Ora = new OraSes(Program.ora_username, Program.ora_password, Program.ora_datasource);
-
-                    JSON _JSON = new JSON(Ora.RQuery("select * from smgoods"));
-                    message = _JSON.output;
-
-                    
-
-
-
-                    Console.WriteLine(message);
-
-                    Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
-
-                    data = Encoding.UTF8.GetBytes(message);
-                    stream.Write(data, 0, data.Length);
-
-                    //stream.Close();
-                }
-            }
-            catch(Exception _Exception)
-            {
-                Console.WriteLine("Ошибка [SocketServer]: " + _Exception.Message);
-            }
-            finally
-            {
-                if (stream != null)
-                    stream.Close();
-                if (client != null)
-                    client.Close();
+                // Остановим его
+                Listener.Stop();
             }
         }
     }
