@@ -16,6 +16,11 @@ namespace AServer
         public static string sServiceUser;
         public static string sServicePassword;
 
+        public static string MHost;
+        public static string MSource;
+        public static string MUser;
+        public static string MPass;
+
         public static SocketServer _SocketServer;
 
 
@@ -35,6 +40,26 @@ namespace AServer
                     int i = 0;
                     while (i != args.Length)
                     {
+                        if (args[i].ToString().Contains("MHost:"))
+                        {
+                            MHost = args[i].ToString().Substring(6, args[i].ToString().Length - 6);
+                            Console.WriteLine("MySQL host: " + MHost.ToString());
+                        }
+                        if (args[i].ToString().Contains("MSource:"))
+                        {
+                            MSource = args[i].ToString().Substring(8, args[i].ToString().Length - 8);
+                            Console.WriteLine("MySQL data base: " + MSource.ToString());
+                        }
+                        if (args[i].ToString().Contains("MUser:"))
+                        {
+                            MUser = args[i].ToString().Substring(6, args[i].ToString().Length - 6);
+                            Console.WriteLine("MySQL user: " + MUser.ToString());
+                        }
+                        if (args[i].ToString().Contains("MPass:"))
+                        {
+                            MPass = args[i].ToString().Substring(6, args[i].ToString().Length - 6);
+                            Console.WriteLine("MPass: " + charpas(MPass.Length));
+                        }
                         if (args[i].ToString().Contains("ip:"))
                         {
                             ip = args[i].ToString().Substring(3, args[i].ToString().Length - 3);
@@ -95,8 +120,6 @@ namespace AServer
                 }
 
                 Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
-
-                MySQL _MySQL = new MySQL("192.168.1.242", "info", "root", "kj87dyt");
 
                 _SocketServer = new SocketServer(ip, port);
 

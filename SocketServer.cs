@@ -44,7 +44,7 @@ namespace AServer
             while ((Count = Client.GetStream().Read(Buffer, 0, Buffer.Length)) > 0)
             {
                 // Преобразуем эти данные в строку и добавим ее к переменной Request
-                Request += Encoding.ASCII.GetString(Buffer, 0, Count);
+                Request += Encoding.UTF8.GetString(Buffer, 0, Count);
                 // Запрос должен обрываться последовательностью \r\n\r\n
                 // Либо обрываем прием данных сами, если длина строки Request превышает 4 килобайта
                 // Нам не нужно получать данные из POST-запроса (и т. п.), а обычный запрос
@@ -163,7 +163,6 @@ namespace AServer
                 {
                     Console.WriteLine("Запрос в базу [active directory]: " + query[1]);
 
-                    OraSes Ora;
                     JSON _JSON;
 
                     try
@@ -180,8 +179,109 @@ namespace AServer
                         byte[] EBuffer = Encoding.UTF8.GetBytes(error);
                         Client.GetStream().Write(EBuffer, 0, EBuffer.Length);
 
-                        Ora = null;
+                        _JSON = null;
+                    }
 
+                    string Headers = "HTTP/1.1 200 OK\nContent-Type: application/json;\nContent-Length: " + _JSON.output.Length + ";\ncharset=utf-8;\n\n";
+                    byte[] HeadersBuffer = Encoding.UTF8.GetBytes(Headers);
+                    Client.GetStream().Write(HeadersBuffer, 0, HeadersBuffer.Length);
+
+                    string mymessage = _JSON.output;
+                    byte[] HBuffer = Encoding.UTF8.GetBytes(mymessage);
+                    Client.GetStream().Write(HBuffer, 0, HBuffer.Length);
+
+                    Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+                }
+                else SendError(Client, 404);
+            }
+            if (RequestUri.IndexOf("rmysql") > -1)
+            {
+                Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+
+                string[] query;
+
+                try
+                {
+                    query = RequestUri.Split(new char[] { '&' });
+                }
+                catch
+                {
+                    query = null;
+                }
+
+                if (query != null)
+                {
+                    Console.WriteLine("Запрос в базу [mysql]: " + query[1]);
+
+                    MySQL _MySQL;
+                    JSON _JSON;
+
+                    try
+                    {
+                        _MySQL = new MySQL(Program.MHost, Program.MSource, Program.MUser, Program.MPass);
+                        _JSON = new JSON(_MySQL.RQuery(query[1]));
+                    }
+                    catch (Exception _Exception)
+                    {
+                        Console.WriteLine("Ошибка [query]: " + _Exception.Message);
+
+                        string error = "error: " + _Exception.Message;
+                        byte[] EBuffer = Encoding.UTF8.GetBytes(error);
+                        Client.GetStream().Write(EBuffer, 0, EBuffer.Length);
+
+                        _MySQL = null;
+                        _JSON = null;
+                    }
+
+                    string Headers = "HTTP/1.1 200 OK\nContent-Type: application/json;\nContent-Length: " + _JSON.output.Length + ";\ncharset=utf-8;\n\n";
+                    byte[] HeadersBuffer = Encoding.UTF8.GetBytes(Headers);
+                    Client.GetStream().Write(HeadersBuffer, 0, HeadersBuffer.Length);
+
+                    string mymessage = _JSON.output;
+                    byte[] HBuffer = Encoding.UTF8.GetBytes(mymessage);
+                    Client.GetStream().Write(HBuffer, 0, HBuffer.Length);
+
+                    Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+                }
+                else SendError(Client, 404);
+            }
+
+            if (RequestUri.IndexOf("wmysql") > -1)
+            {
+                Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
+
+                string[] query;
+
+                try
+                {
+                    query = RequestUri.Split(new char[] { '&' });
+                }
+                catch
+                {
+                    query = null;
+                }
+
+                if (query != null)
+                {
+                    Console.WriteLine("Запрос в базу [mysql]: " + query[1]);
+
+                    MySQL _MySQL;
+                    JSON _JSON;
+
+                    try
+                    {
+                        _MySQL = new MySQL(Program.MHost, Program.MSource, Program.MUser, Program.MPass);
+                        _JSON = new JSON(_MySQL.WQuery(query[1]));
+                    }
+                    catch (Exception _Exception)
+                    {
+                        Console.WriteLine("Ошибка [query]: " + _Exception.Message);
+
+                        string error = "error: " + _Exception.Message;
+                        byte[] EBuffer = Encoding.UTF8.GetBytes(error);
+                        Client.GetStream().Write(EBuffer, 0, EBuffer.Length);
+
+                        _MySQL = null;
                         _JSON = null;
                     }
 

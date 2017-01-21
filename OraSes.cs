@@ -46,7 +46,7 @@ namespace AServer
 
                     i += 1;
                 }
-
+                dr.Close();
                 return Result;
             }
             catch (Exception _Exception)
