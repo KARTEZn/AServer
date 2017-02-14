@@ -9,3 +9,5 @@ i:\rep\AServer\bin\Debug\Newtonsoft.Json.dll
 i:\rep\AServer\bin\Debug\Newtonsoft.Json.xml
 i:\rep\AServer\bin\Debug\System.Data.OracleClient.dll
 i:\rep\AServer\bin\Debug\MySql.Data.dll
+i:\rep\AServer\bin\Debug\System.Data.SQLite.dll
+i:\rep\AServer\bin\Debug\System.Data.SQLite.pdb

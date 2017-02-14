@@ -1,0 +1,14 @@
+i:\rep\AServer\bin\x86\Release\AServer.exe.config
+i:\rep\AServer\bin\x86\Release\AServer.exe
+i:\rep\AServer\bin\x86\Release\AServer.pdb
+i:\rep\AServer\bin\x86\Release\MySql.Data.dll
+i:\rep\AServer\bin\x86\Release\Newtonsoft.Json.dll
+i:\rep\AServer\bin\x86\Release\System.Data.OracleClient.dll
+i:\rep\AServer\bin\x86\Release\System.Data.SQLite.dll
+i:\rep\AServer\bin\x86\Release\System.DirectoryServices.AccountManagement.dll
+i:\rep\AServer\bin\x86\Release\Newtonsoft.Json.xml
+i:\rep\AServer\bin\x86\Release\System.Data.SQLite.pdb
+i:\rep\AServer\obj\x86\Release\AServer.csprojResolveAssemblyReference.cache
+i:\rep\AServer\obj\x86\Release\AServer.exe
+i:\rep\AServer\obj\x86\Release\AServer.pdb
+i:\rep\AServer\bin\x86\Release\System.Data.dll

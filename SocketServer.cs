@@ -89,6 +89,33 @@ namespace AServer
                 return;
             }
 
+            if (RequestUri.IndexOf("admin") > -1)
+            {
+                try
+                {
+                    string aout = "";
+
+                    aout += "<html>";
+                    aout += "<head>";
+                    aout += "<title>Панель администратора | AServer</title>";
+                    aout += "</head>";
+                    aout += "<body>";
+                    aout += "<div style=\"position: absolute; width: 400px; height: 400px; left: 50%; top: 50%; margin-left:-200px; margin-top:-200px; background: #fc0;\">";
+                    aout += "</div>";
+                    aout += "</body>";
+                    aout += "</html>";
+
+                    string Headers = "HTTP/1.1 200 OK\nContent-Type: text/html;\nContent-Length: " + aout.Length + ";\ncharset=utf-8;\n\n";
+                    byte[] HeadersBuffer = Encoding.UTF8.GetBytes(Headers);
+                    Client.GetStream().Write(HeadersBuffer, 0, HeadersBuffer.Length);
+
+                    string mymessage = aout;
+                    byte[] HBuffer = Encoding.UTF8.GetBytes(mymessage);
+                    Client.GetStream().Write(HBuffer, 0, HBuffer.Length);
+                }
+                catch { }
+            }
+
             if (RequestUri.IndexOf("oracle") > -1)
             {
                 Console.WriteLine("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n");
